@@ -38,12 +38,18 @@ def hybrid_woa_gwo(search_space, fitness_function, num_individuals=20, iteration
         for i in range(num_individuals):
             r1, r2 = random.random(), random.random()
             A, C = 2 * a * r1 - a, 2 * r2
-            D_alpha, D_beta, D_delta = abs(C * alpha[key] - population[i][key]) for key in search_space
+
+            # به روز رسانی موقعیت هر فرد
+            updated_position = {}
+            for key in search_space:
+                D_alpha = abs(C * float(alpha[key]) - float(population[i][key]))
+                D_beta = abs(C * beta[key] - population[i][key])
+                D_delta = abs(C * delta[key] - population[i][key])
+                
+                # میانگین گرفتن برای به روز رسانی موقعیت
+                updated_position[key] = (alpha[key] - A * D_alpha + beta[key] - A * D_beta + delta[key] - A * D_delta) / 3
             
-            population[i] = {
-                key: (alpha[key] - A * D_alpha + beta[key] - A * D_beta + delta[key] - A * D_delta) / 3 
-                for key in search_space
-            }
+            population[i] = updated_position
 
         fitness_scores = evaluate_population(population, fitness_function)
         alpha, beta, delta = select_alpha_beta_delta(population, fitness_scores)

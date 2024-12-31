@@ -2,17 +2,20 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 class DatasetManager:
-    def __init__(self, file_path, target_column, test_split=0.2):
+    def __init__(self, file_path, target_column, test_split=0.2, random_state=42):
         """
         مدیریت دیتاست و تقسیم داده‌ها برای آموزش و تست.
+        
         Args:
             file_path (str): مسیر فایل دیتاست.
             target_column (str): نام ستون لیبل (خروجی).
             test_split (float): درصد داده تست (پیش‌فرض: 20٪).
+            random_state (int): Seed برای تقسیم تصادفی داده‌ها.
         """
         self.file_path = file_path
         self.target_column = target_column
         self.test_split = test_split
+        self.random_state = random_state
 
         self.X = None
         self.y = None
@@ -25,19 +28,19 @@ class DatasetManager:
         elif str(self.file_path).endswith(".xlsx"):
             return pd.read_excel(self.file_path)
         else:
-            raise ValueError("Unsupported file format. Use .csv or .xlsx")
+            raise ValueError("Unsupported file format. Please provide a .csv or .xlsx file.")
 
     def _load_and_split(self):
         """بارگذاری و جداسازی ویژگی‌ها و لیبل‌ها + تقسیم‌بندی به Train و Test."""
         dataset = self._load_dataset()
 
         if self.target_column not in dataset.columns:
-            raise ValueError(f"Target column '{self.target_column}' not found in dataset.")
+            raise ValueError(f"Target column '{self.target_column}' not found in the dataset columns: {list(dataset.columns)}")
 
         X = dataset.drop(columns=[self.target_column])
         y = dataset[self.target_column]
 
-        return train_test_split(X, y, test_size=self.test_split, random_state=42)
+        return train_test_split(X, y, test_size=self.test_split, random_state=self.random_state)
 
     def get_splits(self):
         """بازگرداندن داده‌های تقسیم‌شده."""
